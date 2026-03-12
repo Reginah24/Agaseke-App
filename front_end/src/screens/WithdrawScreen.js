@@ -26,10 +26,22 @@ const WithdrawScreen = () => {
   const onSuccess = route.params?.onSuccess;
 
   const summary = useMemo(() => {
-    const value = parseFloat(amount) || 0;
+    const value = parseFloat(amount.replace(/,/g, "")) || 0;
     const fee = value * 0.02;
     const net = Math.max(value - fee, 0);
     return { value, fee, net };
+  }, [amount]);
+
+  const formattedAmount = useMemo(() => {
+    if (!amount) {
+      return "0";
+    }
+
+    const [whole, decimal] = amount.split(".");
+    const formattedWhole = Number((whole || "0").replace(/,/g, "")).toLocaleString();
+    return decimal !== undefined
+      ? `${formattedWhole}.${decimal}`
+      : formattedWhole;
   }, [amount]);
 
   const handleSubmit = () => {
@@ -84,7 +96,7 @@ const WithdrawScreen = () => {
           ]}
         >
           <Text style={[styles.amountValue, { color: colors.text }]}>
-            {amount || "0"} RWF
+            {formattedAmount} RWF
           </Text>
           <Text style={{ color: colors.subtitle }}>2% fee applies</Text>
         </View>
@@ -132,11 +144,11 @@ const WithdrawScreen = () => {
           />
           <SummaryRow
             label="Service Fee (2%)"
-            value={`${summary.fee.toFixed(0)} RWF`}
+            value={`${Math.round(summary.fee).toLocaleString()} RWF`}
           />
           <SummaryRow
             label="You'll Receive"
-            value={`${summary.net.toFixed(0)} RWF`}
+            value={`${Math.round(summary.net).toLocaleString()} RWF`}
             bold
           />
         </View>

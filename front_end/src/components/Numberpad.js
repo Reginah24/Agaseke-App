@@ -6,15 +6,31 @@ const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"];
 const NumberPad = ({ value, onChange }) => {
   const { colors } = useThemeMode();
 
+  const formatNumericString = (input) => {
+    const [integerPart, decimalPart] = input.split(".");
+    const normalizedInteger = integerPart.replace(/^0+(?=\d)/, "") || "0";
+    const formattedInteger = Number(normalizedInteger).toLocaleString();
+
+    return decimalPart !== undefined
+      ? `${formattedInteger}.${decimalPart}`
+      : formattedInteger;
+  };
+
   const handlePress = (key) => {
+    const rawValue = (value || "").replace(/,/g, "");
+
     if (key === "⌫") {
-      onChange((prev) => prev.slice(0, -1));
+      const nextRaw = rawValue.slice(0, -1);
+      onChange(nextRaw ? formatNumericString(nextRaw) : "");
       return;
     }
-    if (key === "." && value.includes(".")) {
+
+    if (key === "." && rawValue.includes(".")) {
       return;
     }
-    onChange((prev) => `${prev}${key}`.replace(/^0+(?=\d)/, ""));
+
+    const nextRaw = `${rawValue}${key}`;
+    onChange(formatNumericString(nextRaw));
   };
 
   return (

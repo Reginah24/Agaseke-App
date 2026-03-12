@@ -14,10 +14,20 @@ const TransferScreen = () => {
   const { colors } = useThemeMode();
 
   const summary = useMemo(() => {
-    const value = parseFloat(amount) || 0;
+    const value = parseFloat(amount.replace(/,/g, '')) || 0;
     const tier = feeTiers.find(t => value <= t.max) || feeTiers[feeTiers.length - 1];
     const fee = value === 0 ? 0 : tier.fee;
     return { value, fee, total: value + fee };
+  }, [amount]);
+
+  const formattedAmount = useMemo(() => {
+    if (!amount) {
+      return '0';
+    }
+
+    const [whole, decimal] = amount.split('.');
+    const formattedWhole = Number((whole || '0').replace(/,/g, '')).toLocaleString();
+    return decimal !== undefined ? `${formattedWhole}.${decimal}` : formattedWhole;
   }, [amount]);
 
   const handleSubmit = () => {
@@ -31,7 +41,7 @@ const TransferScreen = () => {
     }
     Alert.alert(
       'Transfer Sent',
-      `Sending ${summary.value.toLocaleString()} RWF (+${summary.fee} RWF fee) to ${recipient}.`
+      `Sending ${summary.value.toLocaleString()} RWF (+${summary.fee.toLocaleString()} RWF fee) to ${recipient}.`
     );
   };
 
@@ -53,7 +63,7 @@ const TransferScreen = () => {
 
       <Section title="Transfer Amount">
         <View style={[styles.amountCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.amountValue, { color: colors.text }]}>{amount || '0'} RWF</Text>
+          <Text style={[styles.amountValue, { color: colors.text }]}>{formattedAmount} RWF</Text>
         </View>
       </Section>
 

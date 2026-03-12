@@ -17,8 +17,20 @@ const DepositScreen = () => {
   const route = useRoute();
   const onSuccess = route.params?.onSuccess;
 
+  const formattedAmount = (() => {
+    if (!amount) {
+      return "0";
+    }
+
+    const [whole, decimal] = amount.split(".");
+    const formattedWhole = Number((whole || "0").replace(/,/g, "")).toLocaleString();
+    return decimal !== undefined
+      ? `${formattedWhole}.${decimal}`
+      : formattedWhole;
+  })();
+
   const handleSubmit = () => {
-    const numericAmount = parseFloat(amount);
+    const numericAmount = parseFloat(amount.replace(/,/g, ""));
     if (!numericAmount || Number.isNaN(numericAmount)) {
       Alert.alert("Amount Required", "Please enter an amount to deposit.");
       return;
@@ -58,7 +70,7 @@ const DepositScreen = () => {
             Amount
           </Text>
           <Text style={[styles.amountValue, { color: colors.text }]}>
-            {amount || "0"} RWF
+            {formattedAmount} RWF
           </Text>
         </View>
       </Section>
