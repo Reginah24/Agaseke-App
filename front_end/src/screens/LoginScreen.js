@@ -21,9 +21,16 @@ const LoginScreen = ({ navigation }) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const isValidEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const handleSubmit = async () => {
     if (!form.email || !form.password) {
       Alert.alert("Missing information", "Please enter email and password.");
+      return;
+    }
+    if (!isValidEmail(form.email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
     setLoading(true);

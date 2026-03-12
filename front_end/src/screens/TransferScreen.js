@@ -30,9 +30,18 @@ const TransferScreen = () => {
     return decimal !== undefined ? `${formattedWhole}.${decimal}` : formattedWhole;
   }, [amount]);
 
+  const isValidRwandaPhone = (phone) => {
+    const cleaned = phone.replace(/\s+/g, '');
+    return /^(\+?250)?0?7[2389]\d{7}$/.test(cleaned);
+  };
+
   const handleSubmit = () => {
     if (!recipient.trim()) {
       Alert.alert('Recipient Required', 'Add a phone number to continue.');
+      return;
+    }
+    if (!isValidRwandaPhone(recipient)) {
+      Alert.alert('Invalid Phone Number', 'Enter a valid Rwandan number, e.g. 0781234567 or +250781234567.');
       return;
     }
     if (!amount) {

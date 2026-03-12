@@ -2,6 +2,8 @@ const User = require('../models/userModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 exports.register = async (req, res) => {
   // #swagger.tags = ['Auth']
   try {
@@ -9,6 +11,23 @@ exports.register = async (req, res) => {
     // normalize emails to avoid matching issues (trim + lowercase)
     email = String(email || "").trim().toLowerCase();
     coSignerEmail = String(coSignerEmail || "").trim().toLowerCase();
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required.' });
+    }
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ error: 'Invalid email address.' });
+    }
+    if (!EMAIL_RE.test(coSignerEmail)) {
+      return res.status(400).json({ error: 'Invalid co-signer email address.' });
+    }
+    if (email === coSignerEmail) {
+      return res.status(400).json({ error: 'Co-signer email must be different from your own email.' });
+    }
+    if (!password || String(password).length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+
     //check if user exists
     const existingUser = await User.findOne({ email })
     if (existingUser)

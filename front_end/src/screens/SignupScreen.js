@@ -26,12 +26,28 @@ const SignupScreen = ({ navigation }) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const isValidEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const handleSubmit = async () => {
-    if (!form.name || !form.email || !form.password || !form.coSignerEmail) {
-      Alert.alert(
-        "Incomplete",
-        "Name, email, password and co-signer email are required."
-      );
+    if (!form.name.trim() || !form.email.trim() || !form.password || !form.coSignerEmail.trim()) {
+      Alert.alert("Incomplete", "All fields are required.");
+      return;
+    }
+    if (!isValidEmail(form.email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+    if (!isValidEmail(form.coSignerEmail)) {
+      Alert.alert("Invalid Co-signer Email", "Please enter a valid co-signer email address.");
+      return;
+    }
+    if (form.email.trim().toLowerCase() === form.coSignerEmail.trim().toLowerCase()) {
+      Alert.alert("Invalid Co-signer", "Co-signer email must be different from your own email.");
+      return;
+    }
+    if (form.password.length < 6) {
+      Alert.alert("Weak Password", "Password must be at least 6 characters.");
       return;
     }
     setLoading(true);
