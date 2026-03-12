@@ -57,11 +57,9 @@ const SignupScreen = ({ navigation }) => {
       Alert.alert("Registration failed", result.message);
       return;
     }
-    Alert.alert(
-      "Check Your Email",
-      `We've sent a verification link to ${form.email}.\n\nPlease open it to activate your account before signing in.`,
-      [{ text: "Go to Sign In", onPress: () => navigation.navigate("Login") }]
-    );
+    Alert.alert("Success", "Account created. Please sign in.", [
+      { text: "OK", onPress: () => navigation.navigate("Login") },
+    ]);
   };
 
   const inputStyle = {
