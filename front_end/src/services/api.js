@@ -1,7 +1,26 @@
 import axios from "axios";
+import { NativeModules } from "react-native";
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:5000/api";
+const getApiBaseUrl = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+
+  if (__DEV__) {
+    // On physical devices, use the Metro host IP instead of localhost.
+    const scriptURL = NativeModules?.SourceCode?.scriptURL;
+    const hostMatch = scriptURL?.match(/https?:\/\/([^/:]+)/);
+    const host = hostMatch?.[1];
+
+    if (host) {
+      return `http://${host}:5000/api`;
+    }
+  }
+
+  return "http://localhost:5000/api";
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
