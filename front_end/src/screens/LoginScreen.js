@@ -6,16 +6,20 @@ import {
   StyleSheet,
   Pressable,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Screen from "@components/Screen";
 import { useThemeMode } from "@theme/ThemeContext";
 import { useAuth } from "@context/AuthContext";
+import api, { handleApiError } from "@services/api";
 
 const LoginScreen = ({ navigation }) => {
   const { colors } = useThemeMode();
   const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -37,7 +41,22 @@ const LoginScreen = ({ navigation }) => {
     const result = await login(form);
     setLoading(false);
     if (!result.success) {
-      Alert.alert("Login failed", result.message || "Check your credentials.");
+      const msg = result.message || "Check your credentials.";
+      const isUnverified = msg.toLowerCase().includes('not verified') || msg.toLowerCase().includes('verify');
+      setShowResend(isUnverified);
+      Alert.alert("Login failed", msg);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      await api.post('/auth/resend-verification', { email: form.email });
+      Alert.alert('Email Sent', 'A new verification link has been sent to your inbox.');
+    } catch (err) {
+      Alert.alert('Failed', handleApiError(err));
+    } finally {
+      setResending(false);
     }
   };
 
@@ -106,6 +125,19 @@ const LoginScreen = ({ navigation }) => {
           Don't have an account? Create one
         </Text>
       </Pressable>
+
+      {showResend && (
+        <Pressable
+          onPress={handleResend}
+          disabled={resending}
+          style={[styles.resendBtn, { borderColor: colors.primary }]}
+        >
+          {resending
+            ? <ActivityIndicator size="small" color={colors.primary} />
+            : <Text style={[styles.resendText, { color: colors.primary }]}>Resend verification email</Text>
+          }
+        </Pressable>
+      )}
         </View>
       </View>
     </Screen>
@@ -177,6 +209,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 16,
     fontWeight: "600",
+  },
+  resendBtn: {
+    marginTop: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  resendText: {
+    fontWeight: '600',
+    fontSize: 14,
   },
 });
 
