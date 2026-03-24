@@ -40,7 +40,7 @@ const settings = [
         label: "Security & Privacy",
         hint: "Manage approver, PIN",
         icon: "security",
-        action: null,
+        action: "SecurityPrivacy",
       },
     ],
   },

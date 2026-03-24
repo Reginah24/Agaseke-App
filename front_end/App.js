@@ -25,6 +25,7 @@ import LoginScreen from "./src/screens/LoginScreen";
 import GetStartedScreen from "./src/screens/GetStartedScreen";
 import CoSignerPendingScreen from "./src/screens/CoSignerPendingScreen";
 import ProfileInfoScreen from "./src/screens/ProfileInfoScreen";
+import SecurityPrivacyScreen from "./src/screens/SecurityPrivacyScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -158,6 +159,11 @@ const AppFlow = () => (
       name="ProfileInfo"
       component={ProfileInfoScreen}
       options={{ title: "Profile Information" }}
+    />
+    <Stack.Screen
+      name="SecurityPrivacy"
+      component={SecurityPrivacyScreen}
+      options={{ title: "Security & Privacy" }}
     />
     <Stack.Screen
       name="CoSignerPending"
