@@ -36,6 +36,13 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.get("/", (_req, res) => {
+    res.status(200).json({
+        message: "AGASEKE backend is running",
+        health: "/health",
+        docs: "/api/documentation",
+    });
+});
 app.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok", uptime: process.uptime() });
 });
