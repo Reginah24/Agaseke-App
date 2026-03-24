@@ -34,7 +34,7 @@ const settings = [
         label: "Profile Information",
         hint: "Update personal details",
         icon: "profile",
-        action: "Signup",
+        action: "ProfileInfo",
       },
       {
         label: "Security & Privacy",
