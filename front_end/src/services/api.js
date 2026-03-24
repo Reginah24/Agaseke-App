@@ -7,7 +7,7 @@ const getApiBaseUrl = () => {
   }
 
   if (__DEV__) {
-    // On physical devices, use the Metro host IP instead of localhost.
+    // In development, derive backend host from Metro so changing Wi-Fi IPs don't break API calls.
     const scriptURL = NativeModules?.SourceCode?.scriptURL;
     const hostMatch = scriptURL?.match(/https?:\/\/([^/:]+)/);
     const host = hostMatch?.[1];
@@ -22,9 +22,13 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+if (__DEV__) {
+  console.log("[API] Using base URL:", API_BASE_URL);
+}
+
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 let authToken = null;

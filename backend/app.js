@@ -20,8 +20,25 @@ if (fs.existsSync(envPath)) {
 }
 
 const app = express();
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ORIGIN || "*")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error("Not allowed by CORS"));
+    },
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "ok", uptime: process.uptime() });
+});
 app.use("/api/documentation", swaggerUi.serve, swaggerUi.setup(swaggerFile, false, {
     docExpansion: "none"
 }));
@@ -32,10 +49,20 @@ app.use("/api", require("./routes/savingRoutes"));
 app.use("/api", require("./routes/withdrawalRoutes"));
 
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || "0.0.0.0";
 
 const startServer = async () => {
     await connectDB();
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    app.listen(PORT, HOST, () => console.log(`Server running on http://${HOST}:${PORT}`));
 };
 
-startServer();
+if (process.env.VERCEL === "1") {
+    // Vercel serverless runtime: establish DB connection without creating a local listener.
+    connectDB().catch((error) => {
+        console.error("Failed to initialize database on Vercel:", error.message);
+    });
+} else {
+    startServer();
+}
+
+module.exports = app;
