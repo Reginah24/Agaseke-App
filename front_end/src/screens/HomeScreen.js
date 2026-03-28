@@ -25,17 +25,22 @@ const HomeScreen = () => {
   const { user } = useAuth();
   const [savings, setSavings] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
+  // FIX 8: track co-signer pending requests so the button is only shown when relevant
+  const [toApprove, setToApprove] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [savingsResponse, withdrawalsResponse] = await Promise.all([
+      const [savingsRes, withdrawalsRes, coSignerRes] = await Promise.allSettled([
         api.get("/saving"),
         api.get("/withdrawal"),
+        api.get("/withdrawal/pending"),
       ]);
-      setSavings(savingsResponse.data || []);
-      setWithdrawals(withdrawalsResponse.data || []);
+      if (savingsRes.status === "fulfilled") setSavings(savingsRes.value.data || []);
+      if (withdrawalsRes.status === "fulfilled") setWithdrawals(withdrawalsRes.value.data || []);
+      // co-signer endpoint returns [] for non-co-signers — safe to use directly
+      if (coSignerRes.status === "fulfilled") setToApprove(coSignerRes.value.data || []);
     } catch (error) {
       Alert.alert("Error", handleApiError(error));
     } finally {
@@ -54,9 +59,14 @@ const HomeScreen = () => {
     0
   );
   const pending = withdrawals.filter((item) => item.status === "pending");
-  const estimatedProfit = withdrawals
-    .filter((item) => item.status === "approved")
-    .reduce((sum, item) => sum + item.amount * 0.02, 0);
+  // FIX 5: previously summed 2% of approved withdrawals which made profit go up
+  // the more money was withdrawn - backwards. Now shows % progress toward goal target.
+  const progressTowardTarget = primarySaving
+    ? Math.min(
+        ((primarySaving.currentAmount || 0) / (primarySaving.targetAmount || 1)) * 100,
+        100
+      ).toFixed(1)
+    : 0;
   const primarySaving = savings[0];
 
   return (
@@ -108,7 +118,8 @@ const HomeScreen = () => {
             onPress={() => navigation.navigate("Activity")}
           />
 
-          <Section title="Your Profit">
+          {/* FIX 5: replaced misleading profit card with goal progress */}
+          <Section title="Goal Progress">
             <View
               style={[
                 styles.profitCard,
@@ -117,10 +128,10 @@ const HomeScreen = () => {
             >
               <View>
                 <Text style={[styles.profitAmount, { color: colors.text }]}>
-                  {formatCurrency(estimatedProfit)}
+                  {progressTowardTarget}%
                 </Text>
                 <Text style={[styles.profitLabel, { color: colors.subtitle }]}>
-                  Estimated 2% from withdrawals
+                  of target reached ({formatCurrency(primarySaving?.currentAmount || 0)} saved)
                 </Text>
               </View>
               <MaterialIcons name="trending-up" size={32} color={colors.subtitle} />
@@ -165,19 +176,24 @@ const HomeScreen = () => {
               onTransfer={() => navigation.navigate("Transfer")}
               onGoals={() => navigation.navigate("Goals")}
             />
-            {/* Temporary button for co-signer access during testing */}
-            <Pressable
-              onPress={() => navigation.navigate('CoSignerPending')}
-              style={{
-                marginTop: 12,
-                padding: 12,
-                backgroundColor: colors.primary,
-                borderRadius: 12,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Pending Approvals</Text>
-            </Pressable>
+            {/* FIX 8: only show Pending Approvals if this user is listed as a co-signer
+                for someone — checked by seeing if any pending items exist in toApprove */}
+            {toApprove.length > 0 && (
+              <Pressable
+                onPress={() => navigation.navigate('CoSignerPending')}
+                style={{
+                  marginTop: 12,
+                  padding: 12,
+                  backgroundColor: colors.primary,
+                  borderRadius: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700' }}>
+                  Pending Approvals ({toApprove.length})
+                </Text>
+              </Pressable>
+            )}
           </Section>
         </>
       )}
