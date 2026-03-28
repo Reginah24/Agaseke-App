@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import { startKeepAlive } from "./src/services/keepAlive";
+import { startKeepAlive } from "./src/services/Keepalive";
 import React, { useMemo, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";

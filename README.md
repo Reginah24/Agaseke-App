@@ -1,132 +1,281 @@
-# AGASEKE - Digital Piggy Bank Application
+# AGASEKE - Goal-Based Digital Savings Platform
 
-A modern digital savings application that helps users track and achieve their financial goals through an intuitive mobile interface.
+A mobile-first digital savings application that helps African youth build disciplined saving habits through goal tracking, co-signer accountability, and controlled withdrawal approval.
+
+## Quick Start
+
+1. Deploy backend on Vercel (Root Directory: `backend`).
+2. Add required environment variables in Vercel settings.
+3. Set frontend API URL in `front_end/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=https://<your-vercel-domain>.vercel.app/api
+```
+
+4. Run frontend:
+
+```bash
+cd front_end
+npm install
+npx expo start -c
+```
 
 ## Features
 
 - **User Authentication**
-  - User signup/registration form
-  - Secure login system
-  - Password protection (min 6 characters)
-  
-- **Goal Management**
-  - Create and track savings goals
-  - Visual progress tracking
-  - Goal achievement notifications
-  
-- **Financial Operations**
-  - Deposit funds
-  - Download transaction history
-  - Real-time balance updates
-  
-- **User Interface**
-  - Clean and modern UI design
-  - Mobile-responsive layout
-  - Intuitive navigation
+  - Register with name, email, password, and co-signer email
+  - Secure JWT-based login
+  - Password hashing with bcrypt (minimum 6 characters)
+
+- **Savings Goal Management**
+  - Create one active savings goal with a target amount and lock date
+  - Deposit funds into your savings balance
+  - Visual progress tracking toward your goal target
+
+- **Co-signer Withdrawal Control**
+  - Request a withdrawal with a stated reason
+  - Co-signer receives an email notification automatically
+  - Co-signer can approve or reject the request from the app
+  - Approved withdrawals deduct from balance; rejected ones do not
+
+- **Activity and History**
+  - View all past deposits and withdrawals
+  - Filter withdrawals by status (`pending`, `approved`, `rejected`)
+  - Co-signer can view all pending requests assigned to them
+
+- **Stability Features**
+  - Global MongoDB connection caching for Vercel serverless
+  - Automatic DB connection check before every API request
+  - Keep-alive ping every 4 minutes to reduce cold starts
+  - Health endpoint reports DB connection status
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Mobile app | React Native (Expo) |
+| Backend API | Node.js + Express 5 |
+| Database | MongoDB Atlas (Mongoose) |
+| Authentication | JWT (`jsonwebtoken`) |
+| Email notifications | Nodemailer (SMTP) |
+| API Docs | Swagger UI |
+| Deployment | Vercel (backend) |
 
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - npm
-- Expo Go app (for physical device testing) or Android/iOS emulator
+- Expo Go app on your phone (iOS or Android)
+- MongoDB Atlas account (free tier works)
+- Vercel account (free tier works)
 
-### Local Setup (Step by Step)
+## Recommended Setup: Vercel Deployment
 
-1. Clone the repository and open the project root.
+This is the recommended setup for submission and grading. It gives you one stable URL that works on any device and network.
+
+### Step 1 - MongoDB Atlas: Allow all connections
+
+1. Go to [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Open your project -> **Network Access**
+3. Click **Add IP Address** -> **Allow Access from Anywhere** (adds `0.0.0.0/0`)
+4. Click **Confirm**
+
+This is required for Vercel to reach your database.
+
+### Step 2 - Deploy backend to Vercel
+
+1. Push your code to GitHub
+2. Go to [vercel.com](https://vercel.com) and click **Add New Project**
+3. Import your GitHub repository
+4. Set **Root Directory** to `backend`
+5. Add these environment variables in Vercel project settings:
+
+| Key | Value |
+|-----|-------|
+| `MONGO_URI` | your MongoDB Atlas connection string |
+| `JWT_SECRET` | any long random string |
+| `PORT` | `5000` |
+| `HOST` | `0.0.0.0` |
+| `CORS_ORIGIN` | `*` |
+| `NODE_ENV` | `production` |
+| `SMTP_HOST` | your SMTP host (for example `smtp.gmail.com`) |
+| `SMTP_PORT` | `587` |
+| `SMTP_SECURE` | `false` |
+| `SMTP_USER` | your email address |
+| `SMTP_PASS` | your email app password |
+| `EMAIL_FROM` | your email address |
+
+6. Click **Deploy** and wait for completion
+7. Verify:
+
+```text
+https://<your-vercel-domain>.vercel.app/health
+```
+
+Expected response:
+
+```json
+{ "status": "ok", "uptime": 12.3, "db": "connected" }
+```
+
+### Step 3 - Configure frontend
+
+Create or update `front_end/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=https://<your-vercel-domain>.vercel.app/api
+```
+
+Do not use a local IP such as `192.168.x.x` for submission.
+
+### Step 4 - Start the mobile app
+
+```bash
+cd front_end
+npm install
+npx expo start -c
+```
+
+Scan the QR code with Expo Go.
+
+## Local Development Setup
+
+Use this for development only.
+
+1. Clone the repository
 2. Install backend dependencies:
-  - `cd backend`
-  - `npm install`
-3. Create `backend/.env` and set:
-  - `MONGO_URI=<your mongodb atlas uri>`
-  - `JWT_SECRET=<your strong random secret>`
-  - `PORT=5000`
-  - `HOST=0.0.0.0`
-  - `APP_URL=http://localhost:5000`
-  - `CORS_ORIGIN=*`
-4. Start the backend:
-  - `npm start`
-5. In a new terminal, install frontend dependencies:
-  - `cd front_end`
-  - `npm install`
-6. Create `front_end/.env` and set:
-  - `EXPO_PUBLIC_API_URL=http://localhost:5000/api`
+
+```bash
+cd backend
+npm install
+```
+
+3. Create `backend/.env`:
+
+```env
+MONGO_URI=<your mongodb atlas uri>
+JWT_SECRET=<strong random secret>
+PORT=5000
+HOST=0.0.0.0
+CORS_ORIGIN=*
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=<your email>
+SMTP_PASS=<your app password>
+EMAIL_FROM=<your email>
+```
+
+4. Start backend:
+
+```bash
+npm start
+```
+
+5. Install frontend dependencies:
+
+```bash
+cd front_end
+npm install
+```
+
+6. Create `front_end/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://localhost:5000/api
+```
+
 7. Start Expo:
-  - `npx expo start -c`
-8. Open the app using Expo Go or emulator and test signup/login.
 
-### Local Verification
+```bash
+npx expo start -c
+```
 
-1. Backend health: open `http://localhost:5000/health`
-2. API docs: open `http://localhost:5000/api/documentation`
-3. If login fails, confirm `EXPO_PUBLIC_API_URL` matches your running backend URL.
+`localhost` works for web on the same machine. For a physical phone, prefer Vercel deployment for stability.
 
-## Permanent Submission Setup
+## API Endpoints
 
-For stable reviewer testing, use a deployed backend (not local LAN IPs).
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/register` | No | Register new user |
+| POST | `/api/auth/login` | No | Login and get JWT token |
+| GET | `/api/auth/me` | Yes | Get logged-in user profile |
+| POST | `/api/saving/create` | Yes | Create savings goal |
+| POST | `/api/saving/add` | Yes | Deposit funds |
+| GET | `/api/saving` | Yes | Get all savings records |
+| GET | `/api/saving/:id` | Yes | Get saving by ID |
+| POST | `/api/withdrawal/request` | Yes | Request a withdrawal |
+| POST | `/api/withdrawal/approve/:id` | Yes | Approve or reject withdrawal (co-signer only) |
+| GET | `/api/withdrawal` | Yes | Get own withdrawal history |
+| GET | `/api/withdrawal/pending` | Yes | Get pending requests to approve (co-signer) |
+| GET | `/health` | No | Backend and DB health status |
+| GET | `/api/documentation` | No | Swagger API docs |
 
-1. Deploy the backend and get a fixed HTTPS URL (example: https://api.your-domain.com).
-2. In front_end/.env set:
-  EXPO_PUBLIC_API_URL=https://api.your-domain.com/api
-3. In backend/.env set production values (see backend/.env.example):
-  MONGO_URI, JWT_SECRET, HOST, PORT, CORS_ORIGIN, APP_URL.
-4. Verify backend health endpoint:
-  GET /health should return status ok.
+## Co-signer Flow
 
-This removes the need to keep changing laptop IP addresses before demos or grading.
+1. User registers and provides a co-signer email
+2. User creates a savings goal and deposits funds
+3. User submits a withdrawal request with a reason
+4. Co-signer receives an email notification automatically
+5. Co-signer opens the app and views **Pending Approvals**
+6. Co-signer approves or rejects the request
+7. If approved, the amount is deducted from savings balance
+8. If rejected, the balance remains unchanged
 
-### Vercel Deployment (Recommended for Submission)
+## Auto-Redeploy on Every Push
 
-You can deploy the backend on Vercel using the backend/vercel.json config.
+1. In Vercel settings, connect your GitHub repository
+2. Set Production Branch to `main`
+3. Enable **Auto Deploy**
 
-1. Push code to GitHub.
-2. In Vercel, create a new project and set Root Directory to backend.
-3. Add environment variables in Vercel Project Settings:
-  MONGO_URI=<your mongodb atlas uri>
-  JWT_SECRET=<strong random secret>
-  APP_URL=https://<your-vercel-domain>.vercel.app
-  CORS_ORIGIN=*
-  NODE_ENV=production
-4. Deploy and verify:
-  https://<your-vercel-domain>.vercel.app/health
-5. In front_end/.env set:
-  EXPO_PUBLIC_API_URL=https://<your-vercel-domain>.vercel.app/api
-6. Restart Expo with cache clear:
-  npx expo start -c
+Every push to `main` redeploys the backend.
 
-This gives you one permanent backend URL for submission.
+## Troubleshooting
 
-### Important: Mobile App vs Website
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `buffering timed out` | MongoDB IP not whitelisted | Add `0.0.0.0/0` in Atlas Network Access |
+| `Login failed - timeout` | Frontend pointing to local IP | Set `EXPO_PUBLIC_API_URL` to Vercel URL in `front_end/.env` |
+| `401 on /health` | Vercel deployment protection enabled | Disable password protection in Vercel project settings |
+| `Not authorized` on withdrawal approve | Wrong user trying to approve | Only the assigned co-signer email can approve |
+| `Withdrawal already processed` | Approving twice | Each withdrawal can only be approved or rejected once |
+| Co-signer pending list empty | Email case mismatch | Ensure co-signer email at registration matches login email exactly |
+| App slow on first open | Vercel cold start | Open app once before reviewer testing; keep-alive handles the rest |
 
-This project frontend is a React Native Expo mobile app.
+## Project Structure
 
-1. The Vercel URL is for the backend API, not a browser website UI.
-2. Open the mobile app through Expo Go or emulator to test user flows.
-3. Use these endpoints for backend checks:
-  / -> API running message
-  /health -> health status JSON
-  /api/documentation -> Swagger docs
-
-### Auto-Redeploy on Every Push
-
-In Vercel project settings:
-
-1. Connect the correct GitHub repository.
-2. Set Production Branch to main.
-3. Enable Auto Deploy.
-
-After that, every push to main redeploys production automatically.
-
-### Troubleshooting Quick Guide
-
-1. 401 on /health:
-  Deployment protection is enabled in Vercel. Disable project authentication/password protection for testing.
-2. Cannot GET /:
-  Backend is up but root route may be missing in old deployment. Redeploy latest commit.
-3. Login timeout from mobile app:
-  Ensure front_end/.env points to Vercel API URL, not local IP.
-4. Environment variable already exists:
-  Edit existing variable instead of adding a duplicate.
+```text
+Agaseke-App/
+|-- backend/
+|   |-- config/
+|   |   `-- db.js
+|   |-- controllers/
+|   |   |-- authController.js
+|   |   |-- savingController.js
+|   |   `-- withdrawalController.js
+|   |-- middleware/
+|   |   `-- authMiddleware.js
+|   |-- models/
+|   |   |-- userModel.js
+|   |   |-- savingModel.js
+|   |   `-- withdrawalModel.js
+|   |-- routes/
+|   |   |-- authRoutes.js
+|   |   |-- savingRoutes.js
+|   |   `-- withdrawalRoutes.js
+|   |-- app.js
+|   `-- vercel.json
+`-- front_end/
+    |-- src/
+    |   |-- components/
+    |   |-- context/
+    |   |-- screens/
+    |   |-- services/
+    |   `-- theme/
+    `-- App.js
+```
 
 ## License
 
