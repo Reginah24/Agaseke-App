@@ -25,6 +25,9 @@ const WithdrawScreen = () => {
   const route = useRoute();
   const onSuccess = route.params?.onSuccess;
 
+  // FIX 6: summary now uses the raw value for display only.
+  // The backend receives the raw amount and handles deduction itself.
+  // The 2% fee display is kept for transparency but is informational.
   const summary = useMemo(() => {
     const value = parseFloat(amount.replace(/,/g, "")) || 0;
     const fee = value * 0.02;
@@ -33,15 +36,10 @@ const WithdrawScreen = () => {
   }, [amount]);
 
   const formattedAmount = useMemo(() => {
-    if (!amount) {
-      return "0";
-    }
-
+    if (!amount) return "0";
     const [whole, decimal] = amount.split(".");
     const formattedWhole = Number((whole || "0").replace(/,/g, "")).toLocaleString();
-    return decimal !== undefined
-      ? `${formattedWhole}.${decimal}`
-      : formattedWhole;
+    return decimal !== undefined ? `${formattedWhole}.${decimal}` : formattedWhole;
   }, [amount]);
 
   const handleSubmit = () => {
@@ -53,8 +51,11 @@ const WithdrawScreen = () => {
       Alert.alert("Reason Required", "Tell us why you are withdrawing.");
       return;
     }
+
+    // FIX 3: send reason to the backend so co-signer can see it
+    // FIX 6: send summary.value (raw amount) — backend handles the deduction
     api
-      .post("/withdrawal/request", { amount: summary.value })
+      .post("/withdrawal/request", { amount: summary.value, reason: reason.trim() })
       .then(() => {
         Alert.alert(
           "Withdrawal Requested",
@@ -81,7 +82,7 @@ const WithdrawScreen = () => {
           { backgroundColor: "#fff3cd", borderColor: "#ffeaa7" },
         ]}
       >
-        <Text style={styles.noticeTitle}>🔒 Withdrawal Protection Active</Text>
+        <Text style={styles.noticeTitle}>Withdrawal Protection Active</Text>
         <Text style={styles.noticeText}>
           All withdrawal requests require approval from your designated approver
           to keep your savings safe.
@@ -98,7 +99,7 @@ const WithdrawScreen = () => {
           <Text style={[styles.amountValue, { color: colors.text }]}>
             {formattedAmount} RWF
           </Text>
-          <Text style={{ color: colors.subtitle }}>2% fee applies</Text>
+          <Text style={{ color: colors.subtitle }}>2% service fee applies</Text>
         </View>
       </Section>
 
