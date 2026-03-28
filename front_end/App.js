@@ -1,4 +1,5 @@
 import "react-native-gesture-handler";
+import { startKeepAlive } from "./src/services/keepAlive";
 import React, { useMemo, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -204,6 +205,9 @@ export default function App() {
   const navTheme = isDarkMode ? navigationThemes.dark : navigationThemes.light;
 
   const toggleTheme = () => setIsDarkMode((prev) => !prev);
+
+  // Start pinging backend every 4 mins so Vercel never goes cold
+  React.useEffect(() => { startKeepAlive(); }, []);
 
   return (
     <ThemeContext.Provider value={{ isDarkMode, toggleTheme, colors }}>
