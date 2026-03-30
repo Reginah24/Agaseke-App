@@ -4,21 +4,30 @@ A mobile-first digital savings application that helps African youth build discip
 
 ## Quick Start
 
-1. Deploy backend on Vercel (Root Directory: `backend`).
-2. Add required environment variables in Vercel settings.
-3. Set frontend API URL in `front_end/.env`:
+1. Clone the repository.
+2. Deploy backend on Vercel (Root Directory: `backend`).
+3. Add required environment variables in Vercel settings.
+4. Set frontend API URL in `front_end/.env`:
 
 ```env
 EXPO_PUBLIC_API_URL=https://<your-vercel-domain>.vercel.app/api
 ```
 
-4. Run frontend:
+5. Install dependencies and start frontend:
 
 ```bash
 cd front_end
 npm install
 npx expo start -c
 ```
+
+6. Open Expo Go on your phone and scan the QR code.
+
+### First Run vs Next Runs
+
+- First run on a machine: `npm install` then `npm start` (or `npx expo start -c`)
+- Next runs: only `npm start` is needed
+- Run `npm install` again only when dependencies change or `node_modules` was deleted
 
 ## Features
 
@@ -138,6 +147,8 @@ npm install
 npx expo start -c
 ```
 
+On first setup, run `npm install` once. After that, use `npm start` for daily development and use `npx expo start -c` only when you need to clear cache.
+
 Scan the QR code with Expo Go.
 
 ## Local Development Setup
@@ -194,6 +205,8 @@ npx expo start -c
 ```
 
 `localhost` works for web on the same machine. For a physical phone, prefer Vercel deployment for stability.
+
+If you still want to test local backend on a physical phone, use your computer LAN IP in `EXPO_PUBLIC_API_URL` (for example `http://192.168.1.20:5000/api`) and ensure phone and computer are on the same network.
 
 ## API Endpoints
 
