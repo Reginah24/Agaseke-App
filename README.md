@@ -21,12 +21,20 @@ npm install
 npx expo start -c
 ```
 
+For web preview instead of Expo Go:
+
+```bash
+cd front_end
+npx expo start --web
+```
+
 6. Open Expo Go on your phone and scan the QR code.
 
 ### First Run vs Next Runs
 
 - First run on a machine: `npm install` then `npm start` (or `npx expo start -c`)
-- Next runs: only `npm start` is needed
+- Next runs (mobile): only `npm start` is needed
+- Next runs (web): use `npm run web` or `npx expo start --web`
 - Run `npm install` again only when dependencies change or `node_modules` was deleted
 
 ## Features
@@ -139,7 +147,7 @@ EXPO_PUBLIC_API_URL=https://<your-vercel-domain>.vercel.app/api
 
 Do not use a local IP such as `192.168.x.x` for submission.
 
-### Step 4 - Start the mobile app
+### Step 4 - Start the frontend app
 
 ```bash
 cd front_end
@@ -150,6 +158,13 @@ npx expo start -c
 On first setup, run `npm install` once. After that, use `npm start` for daily development and use `npx expo start -c` only when you need to clear cache.
 
 Scan the QR code with Expo Go.
+
+For browser testing on the same machine:
+
+```bash
+cd front_end
+npx expo start --web
+```
 
 ## Local Development Setup
 
@@ -202,6 +217,12 @@ EXPO_PUBLIC_API_URL=http://localhost:5000/api
 
 ```bash
 npx expo start -c
+```
+
+For web in local development:
+
+```bash
+npx expo start --web
 ```
 
 `localhost` works for web on the same machine. For a physical phone, prefer Vercel deployment for stability.
